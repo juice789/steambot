@@ -66,12 +66,11 @@ const getInstance = (bot) => {
         )
     )(functions)
 
-    return {
-        ...bot,
-        handlers,
+    return Object.assign(bot, {
+        handlers, 
         ...sagaFns,
         ...functions
-    }
+    })
 }
 
 module.exports = {
