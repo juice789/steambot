@@ -35,10 +35,47 @@ function* isFriend(steamId) {
     return client.myFriends.hasOwnProperty(steamId)
 }
 
+function* acceptOffer(offer) {
+    try {
+        yield cps([offer, offer.accept], true)
+    } catch (err) {
+        console.log('error accepting offer, continuing...', err.message)
+    }
+    yield call(acceptConfirmation, offer)
+}
+
+function* acceptConfirmation(offer) {
+    const { community } = yield getContext('steam')
+    const { identity_secret } = yield getContext('options')
+    if (offer.itemsToGive.length === 0) {
+        return
+    }
+    try {
+        yield cps([community, community.acceptConfirmationForObject], identity_secret, offer.id)
+        return offer
+    } catch (err) {
+        if (offer.isOurOffer) {
+            throw `error accepting confirmation for our offer, ${err.message}`
+        } else {
+            return offer
+        }
+    }
+}
+
+function* declineOffer(offer) {
+    try {
+        yield cps([offer, offer.decline])
+    } catch (err) {
+        console.log('error while declining offer', err.message)
+    }
+}
+
 module.exports = {
     start,
     restart,
     sendMessage,
     removeFriend,
-    isFriend
+    isFriend,
+    acceptOffer,
+    declineOffer
 }
