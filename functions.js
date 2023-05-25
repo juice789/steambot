@@ -119,6 +119,27 @@ function* getOfferUser(offer) {
     }
 }
 
+function* createOffer({ steamId, myItems, theirItems, message }) {
+    const { manager } = yield getContext('steam')
+    const offer = manager.createOffer(steamId)
+    offer.addMyItems(myItems)
+    offer.addTheirItems(theirItems)
+    offer.setMessage(message)
+    const { them } = yield call(getOfferUser, offer)
+    return { offer, them }
+}
+
+function* sendOffer(offer) {
+    try {
+        yield cps([offer, offer.send])
+    } catch (err) {
+        if (!offer.id) {
+            throw err
+        }
+    }
+    return yield call(acceptConfirmation, offer)
+}
+
 module.exports = {
     start,
     restart,
@@ -131,5 +152,7 @@ module.exports = {
     getInventory,
     getOffer,
     getOffers,
-    getOfferUser
+    getOfferUser,
+    createOffer,
+    sendOffer
 }
