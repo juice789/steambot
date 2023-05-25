@@ -4,5 +4,6 @@
     "shared_secret": "",
     "identity_secret": "",
     "acceptInvites": false,
-    "tf2": false
+    "tf2": false,
+    "steamId": ""
 }

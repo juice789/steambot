@@ -5,6 +5,8 @@ const {
     delay
 } = require('redux-saga/effects')
 
+const { mcps } = require('./utils.js')
+
 function* start() {
     const { client } = yield getContext('steam')
     const { accountName, password } = yield getContext('options')
@@ -70,6 +72,53 @@ function* declineOffer(offer) {
     }
 }
 
+function* fetchNewItems(offer) {
+    try {
+        const [status, tradeInitTime, receivedItems, sentItems] = yield call(mcps, [offer, offer.getExchangeDetails], false)
+        return { offer, receivedItems, sentItems }
+    } catch (err) {
+        throw `error fetching items for offer ${offer.id}, ${err.message}`
+    }
+}
+
+function* getInventory(appID, _steamId, tradableOnly = true) {
+    const { manager } = yield getContext('steam')
+    const { steamId } = yield getContext('options')
+    try {
+        return yield cps([manager, manager.getUserInventoryContents], _steamId || steamId, appID, 2, tradableOnly)
+    } catch (err) {
+        throw `error loading inventory, ${err.message}`
+    }
+}
+
+function* getOffer(id) {
+    const { manager } = yield getContext('steam')
+    try {
+        return yield cps([manager, manager.getOffer], id)
+    } catch (err) {
+        throw `error loading offer, ${err.message}`
+    }
+}
+
+function* getOffers(filter) {
+    const { manager } = yield getContext('steam')
+    try {
+        const [sent, received] = yield call(mcps, [manager, manager.getOffers], filter)
+        return { sent, received }
+    } catch (err) {
+        throw `error loading offers, ${err.message}`
+    }
+}
+
+function* getOfferUser(offer) {
+    try {
+        const [me, them] = yield call(mcps, [offer, offer.getUserDetails])
+        return { me, them }
+    } catch (err) {
+        throw `error getting user details, ${err.message}`
+    }
+}
+
 module.exports = {
     start,
     restart,
@@ -77,5 +126,10 @@ module.exports = {
     removeFriend,
     isFriend,
     acceptOffer,
-    declineOffer
+    declineOffer,
+    fetchNewItems,
+    getInventory,
+    getOffer,
+    getOffers,
+    getOfferUser
 }
