@@ -1,3 +1,4 @@
+const totp = require('steam-totp')
 const {
     getContext,
     cps,
@@ -140,6 +141,76 @@ function* sendOffer(offer) {
     return yield call(acceptConfirmation, offer)
 }
 
+function* getUser(steamId) {
+    const { community } = yield getContext('steam')
+    return yield cps([community, community.getSteamUser], steamId)
+}
+
+//untested
+
+function* getMarketConfirmations() {
+    const { community } = yield getContext('steam')
+    const { identity_secret } = yield getContext('options')
+    const offset = yield cps([totp, totp.getTimeOffset])
+    const time = totp.time(offset)
+    const key = totp.getConfirmationKey(identity_secret, time, 'conf')
+    const confirmations = yield cps([community, community.getConfirmations], time, key)
+    return confirmations.filter(({ type }) => type === 3)
+}
+
+//untested
+function* confirm({ ids, keys }) {
+    const { community } = yield getContext('steam')
+    const { identity_secret } = yield getContext('options')
+    const offset = yield cps([totp, totp.getTimeOffset])
+    const time = totp.time(offset)
+    const key = totp.getConfirmationKey(identity_secret, time, 'allow')
+    yield cps([community, community.respondToConfirmation], ids, keys, time, key, true)
+    return true
+}
+
+//untested
+function* getMarketData(uri) {
+    const { community } = yield getContext('steam')
+    const options = {
+        uri,
+        json: true,
+        headers: {
+            referer: "https://steamcommunity.com/market/search"
+        }
+    }
+    const [response, body] = yield call(mcps, [community, community.httpRequest], options)
+    if (body.success != 1) {
+        throw `market poll error ${body.success}`
+
+    }
+    return body
+}
+
+//untested
+function* marketList(form) {
+    const { community } = yield getContext('steam')
+    const options = {
+        uri: 'https://steamcommunity.com/market/sellitem/',
+        json: true,
+        method: 'POST',
+        headers: {
+            origin: 'https://steamcommunity.com',
+            referer: "https://steamcommunity.com/my/inventory/"
+        },
+        form: {
+            sessionid: community.getSessionID(),
+            ...form
+        }
+    }
+    const [response, body] = yield call(mcps, [community, community.httpRequest], options)
+    if (body.success != 1) {
+        throw body
+
+    }
+    return body
+}
+
 module.exports = {
     start,
     restart,
@@ -154,5 +225,10 @@ module.exports = {
     getOffers,
     getOfferUser,
     createOffer,
-    sendOffer
+    sendOffer,
+    getUser,
+    getMarketConfirmations,
+    confirm,
+    getMarketData,
+    marketList,
 }
