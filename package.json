@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ramda": "^0.29.0",
+    "ramda": "0.28.0",
     "ramda-adjunct": "^4.0.0",
     "redux": "^4.2.1",
     "redux-saga": "^1.2.3",
