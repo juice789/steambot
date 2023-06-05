@@ -50,7 +50,7 @@ function* friendRelationship([steamId, relationship]) {
 
 function* friendsList() {
     const { client: { myFriends } } = yield getContext('steam')
-    const friendsByRelationship = invert(myFriends, myFriends || {})
+    const friendsByRelationship = invert(myFriends || {})
     for (let steamId of friendsByRelationship[2] || []) {
         yield call(friendRelationship, [steamId, 2])
         yield delay(500)

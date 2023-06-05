@@ -1,9 +1,8 @@
 const { getContext, call, all, take } = require('redux-saga/effects')
 const { runSaga, eventChannel } = require('redux-saga')
-const { renameKeysWith } = require('ramda-adjunct')
-const { concat, compose, map } = require('ramda')
 const handlerSchema = require('./handlers.js')
 const functions = require('./functions.js')
+const { map } = require('ramda')
 
 function* subscribeEvent(eventName, lib) {
     const steam = yield getContext('steam')
@@ -37,10 +36,7 @@ function* createHandler({ eventName, customEventName, lib, fn, errors }, bot) {
 
 function* handlersSaga(handlerSchema, bot) {
     yield all(
-        map(
-            (schemaItem) => call(createHandler, schemaItem, bot),
-            handlerSchema
-        )
+        handlerSchema.map(schemaItem => call(createHandler, schemaItem, bot))
     )
 }
 
@@ -52,9 +48,9 @@ const getInstance = (bot) => {
         context: { steam, options }
     }, handlersSaga, handlerSchema, bot)
 
-    const sagaFns = compose(
-        renameKeysWith(concat('_')),
-        map(
+    const functionsActual = options.saga
+        ? functions
+        : map(
             (saga) => (...args) => new Promise((resolve, reject) => {
                 runSaga({
                     context: { steam, options }
@@ -62,14 +58,11 @@ const getInstance = (bot) => {
                     .toPromise()
                     .then(resolve, reject)
             })
-
-        )
-    )(functions)
+            , functions)
 
     return Object.assign(bot, {
-        handlers, 
-        ...sagaFns,
-        ...functions
+        handlers,
+        ...functionsActual
     })
 }
 
