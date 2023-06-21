@@ -15,8 +15,8 @@
     "redux-saga": "^1.2.3",
     "steam-totp": "^2.1.2",
     "steam-tradeoffer-manager": "^2.10.5",
-    "steam-user": "^4.28.4",
-    "steamcommunity": "^3.44.3",
+    "steam-user": "^4.28.6",
+    "steamcommunity": "^3.45.2",
     "tf2": "^3.0.2"
   }
 }
