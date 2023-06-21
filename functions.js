@@ -148,14 +148,14 @@ function* getUser(steamId) {
 
 //untested
 
-function* getMarketConfirmations() {
+function* getConfirmations(_type) {
     const { community } = yield getContext('steam')
     const { identity_secret } = yield getContext('options')
     const offset = yield cps([totp, totp.getTimeOffset])
     const time = totp.time(offset)
     const key = totp.getConfirmationKey(identity_secret, time, 'conf')
     const confirmations = yield cps([community, community.getConfirmations], time, key)
-    return confirmations.filter(({ type }) => type === 3)
+    return confirmations.filter(({ type }) => type === _type)
 }
 
 //untested
@@ -227,7 +227,7 @@ module.exports = {
     createOffer,
     sendOffer,
     getUser,
-    getMarketConfirmations,
+    getConfirmations,
     confirm,
     getMarketData,
     marketList,
