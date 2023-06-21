@@ -146,8 +146,6 @@ function* getUser(steamId) {
     return yield cps([community, community.getSteamUser], steamId)
 }
 
-//untested
-
 function* getConfirmations(_type) {
     const { community } = yield getContext('steam')
     const { identity_secret } = yield getContext('options')
@@ -158,7 +156,6 @@ function* getConfirmations(_type) {
     return confirmations.filter(({ type }) => type === _type)
 }
 
-//untested
 function* confirm({ ids, keys }) {
     const { community } = yield getContext('steam')
     const { identity_secret } = yield getContext('options')
@@ -169,7 +166,6 @@ function* confirm({ ids, keys }) {
     return true
 }
 
-//untested
 function* getMarketData(uri) {
     const { community } = yield getContext('steam')
     const options = {
@@ -187,7 +183,6 @@ function* getMarketData(uri) {
     return body
 }
 
-//untested
 function* marketList(form) {
     const { community } = yield getContext('steam')
     const options = {
