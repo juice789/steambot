@@ -40,7 +40,7 @@ function* isFriend(steamId) {
 
 function* acceptOffer(offer) {
     try {
-        yield cps([offer, offer.accept], true)
+        yield cps([offer, offer.accept])
     } catch (err) {
         console.log('error accepting offer, continuing...', err.message)
     }
