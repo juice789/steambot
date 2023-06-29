@@ -43,6 +43,9 @@ function* acceptOffer(offer) {
         yield cps([offer, offer.accept])
     } catch (err) {
         console.log('error accepting offer, continuing...', err.message)
+        if (err.message.indexOf('Please try again later. (28)') !== -1) {
+            throw err//items unavailable
+        }
     }
     yield call(acceptConfirmation, offer)
 }
