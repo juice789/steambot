@@ -1,14 +1,21 @@
 {
-  "name": "steambot",
+  "name": "@juice789/steambot",
   "version": "1.0.0",
-  "description": "",
+  "description": "steambot",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "juice789",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juice789/steambot"
+  },
+  "bugs": {
+    "url": "https://github.com/juice789/steambot/issues"
+  },
   "dependencies": {
     "ramda": "0.28.0",
     "redux": "^4.2.1",
@@ -18,5 +25,8 @@
     "steam-user": "^4.28.6",
     "steamcommunity": "^3.45.2",
     "tf2": "^3.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
