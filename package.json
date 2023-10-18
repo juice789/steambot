@@ -21,9 +21,9 @@
     "redux": "^4.2.1",
     "redux-saga": "^1.2.3",
     "steam-totp": "^2.1.2",
-    "steam-tradeoffer-manager": "^2.10.5",
-    "steam-user": "^4.28.6",
-    "steamcommunity": "^3.45.2",
+    "steam-tradeoffer-manager": "^2.10.6",
+    "steam-user": "^5.0.1",
+    "steamcommunity": "^3.47.0",
     "tf2": "^3.0.2"
   },
   "publishConfig": {
