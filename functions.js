@@ -156,7 +156,7 @@ function* getConfirmations(_type) {
     const time = totp.time(offset)
     const key = totp.getConfirmationKey(identity_secret, time, 'conf')
     const confirmations = yield cps([community, community.getConfirmations], time, key)
-    return confirmations.filter(({ type }) => type === _type)
+    return _type ? confirmations.filter(({ type }) => type === _type) : confirmations
 }
 
 function* confirm({ ids, keys }) {
