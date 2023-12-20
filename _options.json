@@ -6,5 +6,8 @@
     "acceptInvites": false,
     "tf2": false,
     "steamId": "",
-    "saga": false
+    "saga": false,
+    "client": {},
+    "community": {},
+    "manager": {}
 }
