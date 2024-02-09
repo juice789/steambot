@@ -61,7 +61,7 @@ function* acceptConfirmation(offer) {
         return offer
     } catch (err) {
         if (offer.isOurOffer) {
-            throw `error accepting confirmation for our offer, ${err.message}`
+            throw new Error(`error accepting confirmation for our offer, ${err.message}`)
         } else {
             return offer
         }
@@ -81,7 +81,7 @@ function* fetchNewItems(offer) {
         const [status, tradeInitTime, receivedItems, sentItems] = yield call(mcps, [offer, offer.getExchangeDetails], false)
         return { offer, receivedItems, sentItems }
     } catch (err) {
-        throw `error fetching items for offer ${offer.id}, ${err.message}`
+        throw new Error(`error fetching items for offer ${offer.id}, ${err.message}`)
     }
 }
 
@@ -91,7 +91,7 @@ function* getInventory(appID, _steamId, tradableOnly = true) {
     try {
         return yield cps([manager, manager.getUserInventoryContents], _steamId || steamId, appID, 2, tradableOnly)
     } catch (err) {
-        throw `error loading inventory, ${err.message}`
+        throw new Error(`error loading inventory, ${err.message}`)
     }
 }
 
@@ -100,7 +100,7 @@ function* getOffer(id) {
     try {
         return yield cps([manager, manager.getOffer], id)
     } catch (err) {
-        throw `error loading offer, ${err.message}`
+        throw new Error(`error loading offer, ${err.message}`)
     }
 }
 
@@ -110,7 +110,7 @@ function* getOffers(filter) {
         const [sent, received] = yield call(mcps, [manager, manager.getOffers], filter)
         return { sent, received }
     } catch (err) {
-        throw `error loading offers, ${err.message}`
+        throw new Error(`error loading offers, ${err.message}`)
     }
 }
 
@@ -119,7 +119,7 @@ function* getOfferUser(offer) {
         const [me, them] = yield call(mcps, [offer, offer.getUserDetails])
         return { me, them }
     } catch (err) {
-        throw `error getting user details, ${err.message}`
+        throw new Error(`error getting user details, ${err.message}`)
     }
 }
 
@@ -180,7 +180,7 @@ function* getMarketData(uri) {
     }
     const [response, body] = yield call(mcps, [community, community.httpRequest], options)
     if (body.success != 1) {
-        throw `market poll error ${body.success}`
+        throw new Error(`market poll error ${body.success}`)
 
     }
     return body
@@ -203,7 +203,9 @@ function* marketList(form) {
     }
     const [response, body] = yield call(mcps, [community, community.httpRequest], options)
     if (body.success != 1) {
-        throw body
+        const error = new Error('Market list error')
+        error.body = body
+        throw error
 
     }
     return body
