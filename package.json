@@ -18,13 +18,13 @@
   },
   "dependencies": {
     "ramda": "0.28.0",
-    "redux": "^4.2.1",
-    "redux-saga": "^1.2.3",
-    "request": "^2.88.2",
-    "steam-totp": "^2.1.2",
-    "steam-tradeoffer-manager": "^2.10.6",
-    "steam-user": "^5.0.8",
-    "steamcommunity": "^3.48.2",
+    "redux": "4.2.1",
+    "redux-saga": "1.2.3",
+    "request": "2.88.2",
+    "steam-totp": "2.1.2",
+    "steam-tradeoffer-manager": "^2.11.4",
+    "steam-user": "^5.0.9",
+    "steamcommunity": "^3.48.3",
     "tf2": "^4.0.0"
   },
   "publishConfig": {
