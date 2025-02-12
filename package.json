@@ -1,6 +1,6 @@
 {
   "name": "@juice789/steambot",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "steambot",
   "main": "index.js",
   "scripts": {
