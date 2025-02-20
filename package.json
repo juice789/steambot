@@ -24,7 +24,7 @@
     "steam-totp": "^2.1.2",
     "steam-tradeoffer-manager": "^2.11.7",
     "steam-user": "^5.2.0",
-    "steamcommunity": "3.48.6",
+    "steamcommunity": "^3.48.6",
     "tf2": "^4.0.0"
   },
   "publishConfig": {
