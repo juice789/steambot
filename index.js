@@ -6,6 +6,7 @@ const Manager = require("steam-tradeoffer-manager")
 const Tf2 = require('tf2')
 const { compose, omit, clone } = require('ramda')
 const { getInstance } = require('./getInstance.js')
+const { mcps } = require('./utils.js')
 
 var MyBot = function MyBot(steam, options) {
     EventEmitter.call(this)
@@ -52,5 +53,6 @@ const initSteam = (options) => {
 const createBot = compose(getInstance, initSteam)
 
 module.exports = {
-    createBot
+    createBot,
+    mcps
 }

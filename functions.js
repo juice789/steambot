@@ -231,4 +231,5 @@ module.exports = {
     confirm,
     getMarketData,
     marketList,
+    acceptConfirmation
 }
