@@ -76,20 +76,20 @@ function* declineOffer(offer) {
     }
 }
 
-function* fetchNewItems(offer) {
+function* fetchNewItems(offer, flag = false) {
     try {
-        const [status, tradeInitTime, receivedItems, sentItems] = yield call(mcps, [offer, offer.getExchangeDetails], false)
-        return { offer, receivedItems, sentItems }
+        const [status, tradeInitTime, receivedItems, sentItems] = yield call(mcps, [offer, offer.getExchangeDetails], flag)
+        return { offer, receivedItems, sentItems, status, tradeInitTime }
     } catch (err) {
         throw new Error(`error fetching items for offer ${offer.id}, ${err.message}`)
     }
 }
 
-function* getInventory(appID, _steamId, tradableOnly = true) {
+function* getInventory(appID, _steamId, tradableOnly = true, contextId = 2) {
     const { manager } = yield getContext('steam')
     const { steamId } = yield getContext('options')
     try {
-        return yield cps([manager, manager.getUserInventoryContents], _steamId || steamId, appID, 2, tradableOnly)
+        return yield cps([manager, manager.getUserInventoryContents], _steamId || steamId, appID, contextId, tradableOnly)
     } catch (err) {
         throw new Error(`error loading inventory, ${err.message}`)
     }
@@ -123,13 +123,13 @@ function* getOfferUser(offer) {
     }
 }
 
-function* createOffer({ steamId, myItems, theirItems, message }) {
+function* createOffer({ steamId, myItems, theirItems, message, skipUserCheck = false }) {
     const { manager } = yield getContext('steam')
     const offer = manager.createOffer(steamId)
     offer.addMyItems(myItems)
     offer.addTheirItems(theirItems)
     offer.setMessage(message)
-    const { them } = yield call(getOfferUser, offer)
+    const { them } = skipUserCheck ? {} : yield call(getOfferUser, offer)
     return { offer, them }
 }
 
