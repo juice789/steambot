@@ -3,11 +3,17 @@ const {
     getContext,
     delay,
     cps,
-    call
+    call,
+    take
 } = require('redux-saga/effects')
 
-function* steamGuard([_, callback, lastCodeWrong]) {
+function* steamGuard([domain, callback, lastCodeWrong]) {
     try {
+        if (domain) {
+            const { code } = yield take('STEAMGUARD_CODE')
+            callback(code)
+            return
+        }
         const { shared_secret } = yield getContext('options')
         if (lastCodeWrong) {
             yield delay(60000)
@@ -22,8 +28,11 @@ function* steamGuard([_, callback, lastCodeWrong]) {
 
 function* webSession([_, cookies]) {
     try {
-        const { manager } = yield getContext('steam')
+        const { manager, store } = yield getContext('steam')
         yield cps([manager, manager.setCookies], cookies)
+        if (store) {
+            store.setCookies(cookies)
+        }
     } catch (err) {
         console.log('error setting cookies')
         throw err

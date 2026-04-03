@@ -4,7 +4,7 @@ const SteamUser = require("steam-user")
 const Steamcommunity = require("steamcommunity")
 const Manager = require("steam-tradeoffer-manager")
 const Tf2 = require('tf2')
-
+const SteamStore = require('steamstore')
 const { getInstance } = require('./getInstance.js')
 const { mcps } = require('./utils.js')
 
@@ -41,11 +41,16 @@ const initSteam = (options) => {
     if (options.tf2) {
         tf2 = new Tf2(client)
     }
+    let store
+    if (options.store) {
+        store = new SteamStore()
+    }
     const steam = {
         client,
         community,
         manager,
-        tf2
+        tf2,
+        store
     }
     const { 'client, community, manager': _, ...restOptions } = options
     return new MyBot(steam, restOptions)

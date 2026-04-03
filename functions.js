@@ -1,9 +1,11 @@
 const totp = require('steam-totp')
+
 const {
     getContext,
     cps,
     call,
-    delay
+    delay,
+    take
 } = require('redux-saga/effects')
 
 const { mcps } = require('./utils.js')
@@ -211,6 +213,126 @@ function* marketList(form) {
     return body
 }
 
+function* get2FACode() {
+    try {
+        const { shared_secret } = yield getContext('options')
+        const [code] = yield call(mcps, [totp, totp.getAuthCode], shared_secret)
+        return code
+    } catch (err) {
+        throw new Error(`error getting 2FA code, ${err.message}`)
+    }
+}
+
+function* communityLogin(authCode, _twoFactorCode, disableMobile = true) {
+    try {
+        const { community } = yield getContext('steam')
+        const { accountName, password, shared_secret } = yield getContext('options')
+        let twoFactorCode = _twoFactorCode
+        if (!authCode && !twoFactorCode && shared_secret) {
+            twoFactorCode = yield call(get2FACode)
+        }
+        const [sessionID, cookies] = yield call(mcps, [community, community.login], { accountName, password, authCode, twoFactorCode, disableMobile })
+        console.log('community logged in')
+        return true
+    } catch (err) {
+        if (err.message === 'SteamGuard') {
+            console.log('email code required')
+            const { code } = yield take('STEAM_AUTH_CODE')
+            return yield call(communityLogin, code, null, disableMobile)
+        } else if (err.message === 'SteamGuardMobile') {
+            console.log('2FA code required')
+            const { code } = yield take('STEAM_2FA_CODE')
+            return yield call(communityLogin, null, code, disableMobile)
+        } else {
+            throw new Error(`communityLogin error, ${err.message}`)
+        }
+    }
+}
+
+function* setUpAuth() {
+    try {
+        const { community } = yield getContext('steam')
+        const [response] = yield call(mcps, [community, community.enableTwoFactor])
+        return response
+    } catch (err) {
+        throw new Error(`error setting up two factor, ${err.message}`)
+    }
+}
+
+function* finalizeAuth(code, _shared_secret) {
+    try {
+        const { community } = yield getContext('steam')
+        const { shared_secret } = yield getContext('options')
+        yield call(mcps, [community, community.finalizeTwoFactor], _shared_secret || shared_secret, code)
+        return true
+    } catch (err) {
+        throw new Error(`error finalizing two factor, ${err.message}`)
+    }
+}
+
+function* setUpAndFinalizeAuth() {
+    try {
+        const { community } = yield getContext('steam')
+        const [response] = yield call(mcps, [community, community.enableTwoFactor])
+        console.log(community.steamID.toString(), response)
+        if (response?.status !== 1) {
+            throw new Error('bad response')
+        }
+        console.log('email code required')
+        const { code } = yield take('STEAM_AUTH_CODE')
+        yield call(mcps, [community, community.finalizeTwoFactor], response.shared_secret, code)
+        return response
+    } catch (err) {
+        throw new Error(`setUpAndFinalizeAuth error, ${err.message}`)
+    }
+}
+
+function* setUpApiKey() {
+    try {
+        const { community } = yield getContext('steam')
+        const { identity_secret } = yield getContext('options')
+        const { finalizeOptions } = yield cps([community, community.createWebApiKey], { domain: 'localhost' })
+        yield cps([community, community.acceptConfirmationForObject], identity_secret, finalizeOptions.requestID)
+        const { apiKey } = yield cps([community, community.createWebApiKey], { domain: 'localhost', requestID: finalizeOptions.requestID, identity_secret })
+        console.log(apiKey)
+        return apiKey
+    } catch (err) {
+        console.log(err)
+        throw new Error(`error creating api key, ${err.message}`)
+    }
+}
+
+function* redeemFirst(code, address) {
+    try {
+        const { store } = yield getContext('steam')
+        const [eresult, detail, redeemable] = yield call(mcps, [store, store.createWallet], code, address)
+        if (eresult === 1 && redeemable) {
+            return yield call(redeem, code)
+        } else {
+            console.log({ eresult, detail, redeemable })
+            throw new Error('code could not be redeemed')
+        }
+    } catch (err) {
+        throw new Error(`redeemFirst error, ${err.message}`)
+    }
+}
+
+function* redeem(code) {
+    try {
+        const { store } = yield getContext('steam')
+        const [eresult, detail, formattedNewWalletBalance] = yield call(mcps, [store, store.redeemWalletCode], code)
+        if (!formattedNewWalletBalance) {
+            console.log({ eresult, detail, formattedNewWalletBalance })
+            throw new Error('failed to redeem code')
+        } else {
+            console.log('code redeemed. balance:', formattedNewWalletBalance)
+            return true
+        }
+    } catch (err) {
+        throw new Error(`redeem error, ${err.message}`)
+    }
+}
+
 module.exports = {
     start,
     restart,
@@ -231,5 +353,13 @@ module.exports = {
     confirm,
     getMarketData,
     marketList,
-    acceptConfirmation
+    acceptConfirmation,
+    communityLogin,
+    setUpAuth,
+    finalizeAuth,
+    setUpAndFinalizeAuth,
+    setUpApiKey,
+    redeemFirst,
+    redeem,
+    get2FACode
 }

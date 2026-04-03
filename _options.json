@@ -5,6 +5,7 @@
     "identity_secret": "",
     "acceptInvites": false,
     "tf2": false,
+    "store": false,
     "steamId": "",
     "saga": false,
     "client": {},
