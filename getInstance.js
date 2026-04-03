@@ -2,7 +2,6 @@ const { getContext, call, all, take } = require('redux-saga/effects')
 const { runSaga, eventChannel } = require('redux-saga')
 const handlerSchema = require('./handlers.js')
 const functions = require('./functions.js')
-const { map } = require('ramda')
 
 function* subscribeEvent(eventName, lib) {
     const steam = yield getContext('steam')
@@ -50,15 +49,18 @@ const getInstance = (bot) => {
 
     const functionsActual = options.saga
         ? functions
-        : map(
-            (saga) => (...args) => new Promise((resolve, reject) => {
-                runSaga({
-                    context: { steam, options }
-                }, saga, ...args)
-                    .toPromise()
-                    .then(resolve, reject)
-            })
-            , functions)
+        : Object.fromEntries(
+            Object.entries(functions).map(([name, saga]) => [
+                name,
+                (...args) => new Promise((resolve, reject) => {
+                    runSaga({
+                        context: { steam, options }
+                    }, saga, ...args)
+                        .toPromise()
+                        .then(resolve, reject)
+                })
+            ])
+        )
 
     return Object.assign(bot, {
         handlers,

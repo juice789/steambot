@@ -5,7 +5,6 @@ const {
     cps,
     call
 } = require('redux-saga/effects')
-const { invert } = require('ramda')
 
 function* steamGuard([_, callback, lastCodeWrong]) {
     try {
@@ -50,8 +49,8 @@ function* friendRelationship([steamId, relationship]) {
 
 function* friendsList() {
     const { client: { myFriends } } = yield getContext('steam')
-    const friendsByRelationship = invert(myFriends || {})
-    for (let steamId of friendsByRelationship[2] || []) {
+    const friends = Object.entries(myFriends || {}).filter(([, v]) => v === 2).map(([k]) => k)
+    for (let steamId of friends) {
         yield call(friendRelationship, [steamId, 2])
         yield delay(500)
     }

@@ -4,7 +4,7 @@ const SteamUser = require("steam-user")
 const Steamcommunity = require("steamcommunity")
 const Manager = require("steam-tradeoffer-manager")
 const Tf2 = require('tf2')
-const { compose, omit, clone } = require('ramda')
+
 const { getInstance } = require('./getInstance.js')
 const { mcps } = require('./utils.js')
 
@@ -22,7 +22,7 @@ const initSteam = (options) => {
         promptSteamGuardCode: false,
         ...options.client
     })
-    const communityOptions = clone(options.community)
+    const communityOptions = structuredClone(options.community)
     if (options.community?.request) {
         communityOptions.request = Request.defaults({
             forever: true,
@@ -47,10 +47,11 @@ const initSteam = (options) => {
         manager,
         tf2
     }
-    return new MyBot(steam, omit(['client, community, manager'], options))
+    const { 'client, community, manager': _, ...restOptions } = options
+    return new MyBot(steam, restOptions)
 }
 
-const createBot = compose(getInstance, initSteam)
+const createBot = (options) => getInstance(initSteam(options))
 
 module.exports = {
     createBot,
