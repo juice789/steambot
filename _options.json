@@ -7,7 +7,7 @@
     "tf2": false,
     "steamId": "",
     "saga": false,
-    "client": {},
+    "client": false,
     "community": {},
     "manager": {}
 }

@@ -1,4 +1,5 @@
 const totp = require('steam-totp')
+const { LoginSession, EAuthTokenPlatformType } = require('steam-session')
 const {
     getContext,
     cps,
@@ -169,6 +170,44 @@ function* confirm({ ids, keys }) {
     return true
 }
 
+function* login() {
+    const options = yield getContext('options')
+    const steam = yield getContext('steam')
+    const bot = yield getContext('bot')
+    const { accountName, password, shared_secret } = options
+
+    const sessionOptions = {}
+    if (options.community?.request?.proxy) {
+        sessionOptions.httpProxy = options.community.request.proxy
+    }
+
+    const session = new LoginSession(EAuthTokenPlatformType.WebBrowser, sessionOptions)
+    steam.session = session
+
+    session.once('authenticated', () => bot.emit('authenticated'))
+    session.once('error', (err) => bot.emit('error', [err]))
+    session.once('timeout', () => bot.emit('error', [new Error('Login session timed out')]))
+
+    const code = yield cps([totp, totp.generateAuthCode], shared_secret)
+    yield call([session, session.startWithCredentials], { accountName, password, steamGuardCode: code })
+}
+
+function* getWebCookies() {
+    const { session } = yield getContext('steam')
+    return yield call([session, session.getWebCookies])
+}
+
+function* setCookies(cookies) {
+    const { manager } = yield getContext('steam')
+    // manager.setCookies internally calls community.setCookies too
+    yield cps([manager, manager.setCookies], cookies)
+}
+
+function* refreshCookies() {
+    const cookies = yield call(getWebCookies)
+    yield call(setCookies, cookies)
+}
+
 function* getMarketData(uri) {
     const { community } = yield getContext('steam')
     const options = {
@@ -214,6 +253,10 @@ function* marketList(form) {
 module.exports = {
     start,
     restart,
+    login,
+    getWebCookies,
+    setCookies,
+    refreshCookies,
     sendMessage,
     removeFriend,
     isFriend,

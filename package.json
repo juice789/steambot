@@ -18,12 +18,13 @@
   },
   "dependencies": {
     "redux": "^5.0.1",
-    "redux-saga": "^1.4.2",
+    "redux-saga": "^1.5.0",
     "request": "2.88.2",
     "steam-totp": "^2.1.2",
     "steam-tradeoffer-manager": "^2.13.0",
     "steam-user": "^5.3.0",
     "steamcommunity": "^3.50.0",
+    "steam-session": "^1.9.4",
     "tf2": "^4.0.0"
   },
   "publishConfig": {

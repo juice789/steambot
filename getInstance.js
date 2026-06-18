@@ -44,8 +44,8 @@ const getInstance = (bot) => {
     const { steam, options } = bot
 
     const handlers = runSaga({
-        context: { steam, options }
-    }, handlersSaga, handlerSchema, bot)
+        context: { steam, options, bot }
+    }, handlersSaga, handlerSchema.filter(({ lib }) => !!steam[lib]), bot)
 
     const functionsActual = options.saga
         ? functions
@@ -54,7 +54,7 @@ const getInstance = (bot) => {
                 name,
                 (...args) => new Promise((resolve, reject) => {
                     runSaga({
-                        context: { steam, options }
+                        context: { steam, options, bot }
                     }, saga, ...args)
                         .toPromise()
                         .then(resolve, reject)
