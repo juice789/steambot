@@ -1,9 +1,7 @@
 const EventEmitter = require('events')
 const Request = require('request')
-const SteamUser = require("steam-user")
 const Steamcommunity = require("steamcommunity")
 const Manager = require("steam-tradeoffer-manager")
-const Tf2 = require('tf2')
 const { LoginSession, EAuthTokenPlatformType } = require('steam-session')
 
 const { getInstance } = require('./getInstance.js')
@@ -20,7 +18,7 @@ MyBot.prototype.constructor = MyBot
 
 const initSteam = (options, refreshToken) => {
     const client = options.client !== false
-        ? new SteamUser({
+        ? new (require("steam-user"))({
             promptSteamGuardCode: false,
             ...options.client
         })
@@ -42,7 +40,7 @@ const initSteam = (options, refreshToken) => {
     })
     let tf2
     if (options.tf2 && client) {
-        tf2 = new Tf2(client)
+        tf2 = new (require('tf2'))(client)
     }
     let session
     if (options.client === false) {
